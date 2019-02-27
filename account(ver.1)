@@ -15,7 +15,7 @@ def insert_data():
     data1 = txt_Id.get()
     data2 = txt_pass.get()
     data3 = txt_name.get()
-    data4 = txt_E.get()
+    data4 = txt_E1.get() + "@" + txt_E2.get()
     data5 = txt_age.get()
 
     # account_cur.execute("CREATE TABLE usertable (ID char(15), PASSWORD char(20), Name char(10), Email char(30), Age int)")
@@ -52,6 +52,9 @@ if __name__ == '__main__':
                     , bg="white", width=30, height=3, anchor=W)
     la_E = Label(windows2, text="Email :", font=("바탕", 15), fg="black"
                  , bg="white", width=30, height=3, anchor=W)
+
+    la_gol = Label(windows2, text="@", font=("바탕", 15), fg="black"
+                    , bg="white")
     la_age = Label(windows2, text="Age :", font=("바탕", 15), fg="black"
                    , bg="white", width=30, height=3, anchor=W)
 
@@ -61,7 +64,8 @@ if __name__ == '__main__':
     txt_Id = Entry(windows2, width=30)
     txt_pass = Entry(windows2, width=30)
     txt_name = Entry(windows2, width=30)
-    txt_E = Entry(windows2, width=30)
+    txt_E1 = Entry(windows2, width=10)
+    txt_E2 = Entry(windows2, width=10)
     txt_age = Entry(windows2, width=30)
 
     # button
@@ -76,7 +80,9 @@ if __name__ == '__main__':
     la_name.pack()
     txt_name.pack()
     la_E.pack()
-    txt_E.pack()
+    txt_E1.place(x= 145, y= 370)
+    la_gol.pack()
+    txt_E2.place(x= 280, y= 370)
     la_age.pack()
     txt_age.pack()
     la_info.pack()
