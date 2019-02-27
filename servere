@@ -1,0 +1,53 @@
+from tkinter import *
+from tkinter import messagebox
+
+import socket
+import threading
+
+def r_server():
+    host =''
+    port =5555
+
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((host, port))
+        s.listen(1)
+        conn,addr = s.accept()
+        la_con.config(server, text="Connecting...", font=("바탕", 15), fg="red", bg="white")
+        while (True):
+            data = conn.recv(1024)
+            print(data.decode(encoding="utf-8"))
+            if data== "-1":
+                la_con.config(server, text="Disconnecting...")
+                s.close()
+                break
+
+    except:
+        messagebox.showerror("Erorr","connecting Failed")
+
+def close():
+   server.destroy()
+
+if __name__ == '__main__':
+
+    server = Tk()
+    server.title("Server")
+    server.geometry("1000x800")
+    server.resizable(False,False)
+    server.config(background = "white")
+
+    ser = threading.Thread(target=r_server)
+    ser.start()
+
+    la_ser = Label(server, text="SERVER", font=("바탕", 30), fg="blue", bg="white")
+    la_con = Label(server, text="Disconnecting...", font=("바탕", 15), fg="black", bg="white")
+
+    btn_close = Button(server, text = "Close",bg= "white",command = close)
+
+    la_ser.place(x=100, y =50)
+    la_con.place(x=750, y =50)
+
+    btn_close.place(x= 100,y = 700 ,width = 100, height = 50)
+
+    server.mainloop()
+
