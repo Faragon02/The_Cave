@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 
+import sys
 import socket
 import threading
 
@@ -12,18 +13,27 @@ def r_server():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((host, port))
         s.listen(1)
-        conn,addr = s.accept()
-        la_con.config(server, text="Connecting...", font=("바탕", 15), fg="red", bg="white")
+
         while (True):
-            data = conn.recv(1024)
-            print(data.decode(encoding="utf-8"))
-            if data== "-1":
-                la_con.config(server, text="Disconnecting...")
+            conn, addr = s.accept()
+            la_con.configure(text="Connecting...", fg="red")
+            data = conn.recv(1024).decode(encoding='utf-8')
+            insert_data(data)
+
+            if data=="-1":
+                la_con.configure(text="Disconnecting...", fg="black")
                 s.close()
                 break
 
     except:
+        la_con.configure(text="Disconnecting...", fg="black")
         messagebox.showerror("Erorr","connecting Failed")
+
+def insert_data(save_data):
+    load_data = save_data
+    load_data.split(',')
+
+    print(load_data[0],load_data[1],load_data[2])
 
 def close():
    server.destroy()
