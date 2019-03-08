@@ -1,0 +1,31 @@
+from tkinter import *
+
+from matplotlib import animation
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
+import matplotlib.pyplot as plt
+import random
+
+
+
+rect1 = plt.Rectangle((20, 0), width=10, height=10, fc='r')
+
+def update_height1(i, rect1):
+    height = random.randrange(0, 55)
+    rect1.set_height(height)
+    return rect1
+
+fig = plt.gcf()
+
+ax = plt.axes(xlim=(0, 100), ylim=(0, 100))  # 가로 0~100, 세로 0~100
+ax.set_aspect('equal')
+ax.add_patch(rect1)
+
+if __name__ == '__main__':
+    root = Tk()
+
+    canvas = FigureCanvasTkAgg(fig, root)
+    canvas.get_tk_widget().pack()
+
+    ani1 = animation.FuncAnimation(fig, update_height1(), fargs=(rect1,), frames=30, interval=100)
+
+    root.mainloop()
