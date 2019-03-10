@@ -1,23 +1,45 @@
 from tkinter import *
 from tkinter import messagebox
 from glob import *
-
 from matplotlib import animation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
-import matplotlib.pyplot as plt
-import random
 
+import matplotlib.pyplot as plt
 import sys
 import subprocess
 import sqlite3
 import threading
 import socketserver
-import random
+
 
 # Part of variable declare #
 filist = glob("D:/PyProgram/Cvproject/DataDB.py")
 
 # Part of function(or class) declare #
+class rectangle():
+    i = range(0,24)
+    def __init__(self,x,c,a):
+        self.x = x
+        self.c = c
+        self.a = a
+
+        self.rect = plt.Rectangle((x, 0), width=10, height=10, fc=c)
+        recting = threading.Thread(target=self.update_height, args=(self.i, self.rect,))
+        self.fig = plt.gcf()
+
+        ax.add_patch(self.rect)
+
+        self.canvas = FigureCanvasTkAgg(plt.gcf(), master=server)
+        self.canvas.get_tk_widget().place(x=500, y=200)
+        self.ani = animation.FuncAnimation(self.fig, self.update_height, fargs=(self.rect,), frames=24,
+                                           interval=100)
+
+    def update_height(self,i,rect):
+        height = self.a
+        rect.set_height(height)
+
+        return rect
+
 class EchoRequestHandler(socketserver.BaseRequestHandler):
     # Called before the handle()  method to perform any initialization actions required.
     def setup(self):
@@ -30,16 +52,13 @@ class EchoRequestHandler(socketserver.BaseRequestHandler):
             while (True):
                 data = self.request.recv(1024).strip()
                 stringdata = data.decode(encoding = 'utf-8')
-                print(stringdata)
-                # clean_up_data(stringdata)
 
                 if data:
                     self.request.send(data)
                 else:
                     self.request.close()
                 if data == "-1":
-                    la_con.configure(text="Disconnecting...", foreground="black")
-                    break
+                    pass
         except:
             la_con.configure(text="Disconnecting...",foreground="black")
             messagebox.showerror("Erorr", "connecting Failed")
@@ -62,44 +81,6 @@ class SocksServer(socketserver.ThreadingTCPServer):
 
     def start(self):
         self.serve_forever()
-
-
-class shape():
-    x,c= 0,''
-    i=30
-
-    def drawshape(self):
-        raise NotImplementedError()
-class rectangle(shape):
-    objects =None
-    def __init__(self,x,c,a):
-        self.x = x
-        self.c = c
-        self.drawshape()
-        self.a = a
-
-
-    def drawshape(self):
-        x= self.x; c= self.c
-
-        squrelist=[]
-        self.rect =plt.Rectangle((x,0),width=10, height=10,fc= c)
-        recting = threading.Thread(target=self.update_height, args=(self.i,self.rect,))
-        squrelist.append(self.rect)
-        self.objects =squrelist
-        self.fig = plt.gcf()
-        self.ani =animation.FuncAnimation(self.fig, self.update_height,fargs=(self.rect,),frames= self.i, interval=100)
-
-        ax.add_patch(self.rect)
-
-        self.canvas = FigureCanvasTkAgg(plt.gcf(), master=server)
-        self.canvas.get_tk_widget().place(x=500, y=200)
-
-    def update_height(self,i,rect):
-        height = self.a
-        rect.set_height(height)
-
-        return rect
 
 def clean_up_data(stringdata):
     # conv_data = stringdata
@@ -145,13 +126,16 @@ def DataDB():
     subprocess.call(["python.exe",filist])
 def close():
     server.destroy()
+
+
+
 def monitoring():
-    a = random.randrange(0, 55)
-    rect1 = rectangle(x=20, c='r',a =a)
-    rect2 = rectangle(x=40, c='g',a =a)
-    rect3 = rectangle(x=60, c='b',a =a)
-    rect4 = rectangle(x=80, c='orange',a =a)
-    rect5 = rectangle(x=100,c='black',a =a)
+    rect1 = rectangle(20, 'r', 5)
+    rect2 = rectangle(40, 'g', 5)
+    rect3 = rectangle(60, 'b', 5)
+    rect4 = rectangle(80, 'c', 5)
+    rect5 = rectangle(100,'orange', 5)
+
 # Part of the Main code #
 if __name__ == '__main__':
     host = '192.168.0.16'
@@ -165,14 +149,10 @@ if __name__ == '__main__':
 
     ax = plt.axes(xlim=(0, 120), ylim=(0, 100))  # 가로 0~100, 세로 0~100
     ax.set_aspect('equal')
-
     plt.title("Sensor Monitoring")
     monitoring()
 
-
     ser = threading.Thread(target=runserve, args=(host,port,)).start()
-
-
 
     la_ser = Label(server, text="SERVER", font=("바탕", 30), foreground="blue", background="white")
     la_con = Label(server, text="Disconnecting...", font=("바탕", 15),foreground="black",background="white")
@@ -189,4 +169,3 @@ if __name__ == '__main__':
     btn_DB.place(x=1000, y=700, width=100, height=50)
 
     server.mainloop()
-
