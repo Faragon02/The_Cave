@@ -1,0 +1,19 @@
+import socket
+import random
+
+
+host ='192.168.0.16'
+port = 9999
+c= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+c.connect((host,port))
+
+while(True):
+    a= random.randrange(0,3)
+    data = str(a)+"\n"
+    c.send(data.encode(encoding="utf-8"))
+    if data == "-1":
+        break
+c.close()
+
+
+#problem: 일정 횟수 후 진행을 않함. 하지만, 테스트하기에는 충분함.
