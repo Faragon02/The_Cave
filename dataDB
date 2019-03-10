@@ -1,0 +1,158 @@
+import sqlite3
+from tkinter import *
+from tkinter import messagebox
+
+
+
+## 함수 선언 부분 ##
+def insert_data():
+    con, cur = None, None
+
+    # Image,sensor1,sensor2,sensor3,sensor4,sensor5,date
+    data1, data2, data3, data4, data5, data6, data7 = "", "", "", "", "", "", ""
+    sql = ""
+
+    con = sqlite3.connect("D:/PyProgram/Cvproject/UserDB") # DB에 연결
+    cur = con.cursor() # DB실행 혹은 리턴 통로 역활
+
+    data1 = edt1.get(); data2 = edt2.get(); data3 = edt3.get()
+    data4 = edt4.get(); data5 =edt5.get(); data6=edt6.get() #각 데이터 입력 받음
+
+    try:
+        sql = "INSERT INTO userTable VALUES('" + data1 + "','" \
+              + data2 + "','" + data3 + "'," + data4 \
+              + "'," + data5 + "'," + data6 + "'," + data7 +")"
+
+        cur.execute(sql)
+
+    except :
+        messagebox.showerror('ERROR','Failed data deleting')
+    else:
+        messagebox.showinfo('Succesfull','sucessed data input')
+
+    con.commit() # DB에 저장
+    con.close() # DB 종료
+
+def select_data():
+    strdata1 ,strdata2 ,strdata3 ,strdata4 ,strdata5 ,strdata6 ,strdata7 =[] ,[] ,[] ,[] ,[] ,[] ,[]
+
+    con = sqlite3.connect("D:/PYTHON/python_DB/userDB")
+    cur = con.cursor()
+
+    cur.execute("SELECT * FROM userTable")  # 저장된 DB 출력
+
+    # table 표시
+    strdata1.append("Image");strdata2.append("Sensor1")
+    strdata3.append("senseor2");strdata4.append("senseor3")
+    strdata5.append("senseor4");strdata6.append("senseor5")
+    strdata7.append("Date")
+
+    strdata1.append("--------------------------------------------");strdata2.append("--------------------------------------------")
+    strdata3.append("--------------------------------------------");strdata4.append("--------------------------------------------")
+    strdata5.append("--------------------------------------------");strdata6.append("--------------------------------------------")
+    strdata7.append("--------------------------------------------")
+
+
+    # Data 조회
+    while (True):
+
+        row = cur.fetchone()   # DB 조회 호출
+        if row == None:        # 들어온 것이 없다.
+            break              # 종료
+        strdata1.append(row[0]);strdata2.append(row[1])    # 호출한 데이터를 각 strdata에 저장
+        strdata3.append(row[2]); strdata4.append(row[3])
+
+    listdata1.delete(0, listdata1.size()-1); listdata2.delete(0, listdata2.size()-1)  # listbox 초기화
+    listdata3.delete(0, listdata3.size()-1); listdata4.delete(0, listdata4.size()-1)
+
+    for item1,item2, item3, item4 in zip(strdata1,strdata2,strdata3,strdata4):
+        listdata1.insert(END, item1); listdata2.insert(END, item2)
+        listdata3.insert(END, item3); listdata4.insert(END, item4)
+
+    con.close()
+
+def delete_data():
+    con, cur = None, None
+
+    # Image,sensor1,sensor2,sensor3,sensor4,sensor5,date
+    data1, data2, data3, data4, data5 , data6, data7 = "","","","","" ,"" ,""
+    sql = ""
+
+    con = sqlite3.connect("D:/PYTHON/python_DB/userDB") # DB에 연결
+    cur = con.cursor() # DB실행 혹은 리턴 통로 역활
+
+    data1 = edt1.get(); data2 = edt2.get();data3 = edt3.get();data4 = edt4.get() #각 데이터 입력 받음
+
+    try:
+        sql = "DELETE FROM userTable Image ID='" + data1 + "' and sensor1='" + data2 \
+              + "' and sensor2='" + data3 + "' and sensor3='"+ data4 \
+              + "' and sensor4=" + data5+ "' and sensor5="+ data6 \
+              +"' and date="+ data7+"'"
+
+        cur.execute(sql)
+    except :
+        messagebox.showerror('ERROR','Failed data deleting')
+    else:
+        messagebox.showinfo('Succesfull','sucessed data delete')
+        pass
+    con.commit() # DB에 저장
+    con.close() # DB 종료
+    pass
+
+## 메인 코드 부분 ##
+
+if __name__ == '__main__':
+    DDB = Tk()
+    DDB.geometry("1500x500")
+    DDB.resizable(False, False)
+    DDB.title("DataBase center")
+
+    edtframe = Frame(DDB)
+    edtframe.pack()
+    listframe = Frame(DDB)
+    listframe.pack(side=BOTTOM, fill=BOTH, expand=1)
+
+    # 입력창
+    # text
+    label1 = Label(edtframe, text="Image:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt1 = Entry(edtframe, width=15).pack(side=LEFT, padx=10, pady=10)
+
+    label2 = Label(edtframe, text="sensor1:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt2 = Entry(edtframe, width=15).pack(side=LEFT, padx=10, pady=10)
+
+    label3 = Label(edtframe, text="sensor2:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt3 = Entry(edtframe, width=10).pack(side=LEFT, padx=10, pady=10)
+
+    label4 = Label(edtframe, text="sensor3:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt4 = Entry(edtframe, width=10).pack(side=LEFT, padx=10, pady=10)
+
+    label5 = Label(edtframe, text="sensor4:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt5 = Entry(edtframe, width=10).pack(side=LEFT, padx=10, pady=10)
+
+    label6 = Label(edtframe, text="sensor5:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt6 = Entry(edtframe, width=10).pack(side=LEFT, padx=10, pady=10)
+
+    label7 = Label(edtframe, text="date:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt7 = Entry(edtframe, width=10).pack(side=LEFT, padx=10, pady=10)
+
+    # Button
+    btn_insert = Button(edtframe, text="입력", command=insert_data)
+    btn_insert.pack(side=LEFT, padx=10, pady=10)
+
+    btn_select = Button(edtframe, text="조회", command=select_data)
+    btn_select.pack(side=LEFT, padx=10, pady=10)
+
+    btn_select = Button(edtframe, text="삭제", command=delete_data)
+    btn_select.pack(side=LEFT, padx=10, pady=10)
+
+    # ListBox
+    listdata1 = Listbox(listframe, bg='white');listdata1.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata2 = Listbox(listframe, bg='white');listdata2.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata3 = Listbox(listframe, bg='white');listdata3.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata4 = Listbox(listframe, bg='white');listdata4.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata5 = Listbox(listframe, bg='white');listdata5.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata6 = Listbox(listframe, bg='white');listdata6.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata7 = Listbox(listframe, bg='white');listdata7.pack(side=LEFT, fill=BOTH, expand=1)
+
+
+    DDB.mainloop()
