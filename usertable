@@ -1,0 +1,147 @@
+import sqlite3
+from tkinter import *
+from tkinter import messagebox
+
+
+# 참고 cur.execute("Create table dataable(ID char(20),Password char(20),Name char(10),Email char(30),age int)")
+## 함수 선언 부분 ##
+def insert_data():
+    account_con, account_cur = None, None
+    data1,data2,data3,data4,data5 ="","","","",""
+    sql = ""
+
+    account_con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
+    account_cur = account_con.cursor()
+
+    data1 = edt1.get()
+    data2 = edt2.get()
+    data3 = edt3.get()
+    data4 = edt4.get() + "@" + edt5.get()
+    data5 = edt6.get()
+
+    # account_cur.execute("CREATE TABLE usertable (ID char(15), PASSWORD char(20), Name char(10), Email char(30), Age int)")
+    try:
+        sql = "INSERT INTO usertable VALUES('"+ data1 + "','"+ data2 + "','"+ data3 + "','"+ data4 + "',"+ data5+")"
+        account_cur.execute(sql)
+
+    except:
+        messagebox.showerror("Failed", "Failed insert data")
+
+    else:
+        messagebox.showinfo("succeful", "Succesfully inssert data")
+    account_con.commit()
+    account_con.close()
+
+def select_data():  #조회
+    strdata1, strdata2, strdata3, strdata4, strdata5= [], [],[], [], []
+
+    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
+    cur = con.cursor()
+
+    cur.execute("SELECT * FROM userTable")  # call DB
+
+    # table 표시
+    strdata1.append("  ID");strdata2.append("   Password")
+    strdata3.append("  Name");strdata4.append("  Email")
+    strdata5.append("  Age")
+
+    strdata1.append("--------------------------------------------");strdata2.append("--------------------------------------------")
+    strdata3.append("--------------------------------------------");strdata4.append("--------------------------------------------")
+    strdata5.append("--------------------------------------------")
+
+    # Data 조회
+    while (True):
+
+        row = cur.fetchone()   # DB 조회 호출
+        if row == None:        # 들어온 것이 없다.
+            break              # 종료
+        strdata1.append(row[0]);strdata2.append(row[1])    # 호출한 데이터를 각 strdata에 저장
+        strdata3.append(row[2]); strdata4.append(row[3])
+        strdata5.append(row[4])
+
+    listdata1.delete(0, listdata1.size()-1); listdata2.delete(0, listdata2.size()-1)  # listbox 초기화
+    listdata3.delete(0, listdata3.size()-1); listdata4.delete(0, listdata4.size()-1)
+    listdata5.delete(0, listdata5.size()-1)
+
+    for item1,item2, item3, item4, item5 in zip(strdata1 ,strdata2 ,strdata3 ,strdata4 ,strdata5):
+        listdata1.insert(END, item1); listdata2.insert(END, item2)
+        listdata3.insert(END, item3); listdata4.insert(END, item4)
+        listdata5.insert(END, item5)
+
+    con.close()
+
+def delet_data():
+    con, cur = None, None
+
+    # Numeber ID,Password,Name,E-mail,Age
+    data1, data2, data3, data4, data5 ="", "", "", "", ""
+    sql = ""
+
+    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")  # DB에 연결
+    cur = con.cursor()  # DB실행 혹은 리턴 통로 역활
+    cur.execute("SELECT * FROM userTable")  # call DB
+
+    data1 = edt1.get(); data2 = edt2.get(); data3 = edt3.get()
+    data4 = edt4.get()+'@'+edt5.get() ; data5 =edt6.get()
+
+    try:
+        sql = "DELETE FROM userTable WHERE ID='" + data1+ "' and Password='" + data2+ "' and Name='" + data3 + "' and Email='" + data4+ "' and Age=" + data5
+
+        cur.execute(sql)
+    except:
+        messagebox.showerror('ERROR', 'Delettting error')
+    else:
+        messagebox.showinfo('Succesfull', 'Deletting data')
+
+    con.commit()  # save DB
+    con.close()  # quite DB
+
+
+## 메인 코드 부분 ##
+
+UDB = Tk()
+UDB.geometry("1100x500")
+UDB.resizable(False,False)
+UDB.configure(bg= "white")
+UDB.title("DataBase center")
+
+edtframe = Frame(UDB)
+edtframe.configure(bg ="white")
+edtframe.pack()
+listframe = Frame(UDB)
+listframe.pack(side=BOTTOM, fill=BOTH, expand=1)
+
+# text
+label1 = Label(edtframe, text = "ID:",bg="white").pack(side = LEFT, padx = 5, pady =5)
+edt1 = Entry(edtframe, width=15);edt1.pack(side = LEFT, padx = 10, pady =10)
+label2 = Label(edtframe, text = "Password:",bg="white").pack(side = LEFT, padx = 5, pady =5)
+edt2 = Entry(edtframe, width=15);edt2.pack(side = LEFT, padx = 10, pady =10)
+label3 = Label(edtframe, text = "Name:",bg="white").pack(side = LEFT, padx = 5, pady =5)
+edt3 = Entry(edtframe, width=10);edt3.pack(side = LEFT, padx = 10, pady =10)
+
+label4 = Label(edtframe, text = "Email:",bg="white").pack(side = LEFT, padx = 5, pady =5)
+edt4 = Entry(edtframe, width=10);edt4.pack(side = LEFT, padx = 10, pady =10)
+label5 = Label(edtframe, text = "@",bg="white").pack(side = LEFT, padx = 5, pady =5)
+edt5 = Entry(edtframe, width=10);edt5.pack(side = LEFT, padx = 10, pady =10)
+
+label6 = Label(edtframe, text = "Age:",bg="white").pack(side = LEFT, padx = 5, pady =5)
+edt6 = Entry(edtframe, width=10);edt6.pack(side = LEFT, padx = 10, pady =10)
+
+# Button
+btn_insert = Button(edtframe, text="Insert", command=insert_data)
+btn_insert.pack(side=LEFT, padx=10, pady=10)
+
+btn_select = Button(edtframe, text="Select", command=select_data)
+btn_select.pack(side=LEFT, padx=10, pady=10)
+
+btn_delet = Button(edtframe, text="Delete", command =delet_data)
+btn_delet.pack(side=LEFT, padx=10, pady=10)
+
+# ListBox
+listdata1 = Listbox(listframe, bg='white');listdata1.pack(side=LEFT, fill=BOTH, expand=1)
+listdata2 = Listbox(listframe, bg='white');listdata2.pack(side=LEFT, fill=BOTH, expand=1)
+listdata3 = Listbox(listframe, bg='white');listdata3.pack(side=LEFT, fill=BOTH, expand=1)
+listdata4 = Listbox(listframe, bg='white');listdata4.pack(side=LEFT, fill=BOTH, expand=1)
+listdata5 = Listbox(listframe, bg='white');listdata5.pack(side=LEFT, fill=BOTH, expand=1)
+
+UDB.mainloop()
