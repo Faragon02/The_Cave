@@ -1,11 +1,10 @@
-from tkinter import *
+# 기본 bar simulation
 
+from tkinter import *
 from matplotlib import animation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
 import matplotlib.pyplot as plt
 import random
-
-
 
 rect1 = plt.Rectangle((20, 0), width=10, height=10, fc='r')
 
