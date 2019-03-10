@@ -1,0 +1,43 @@
+# rectangle simulation animation (class form)
+
+from tkinter import *
+from matplotlib import animation
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
+import matplotlib.pyplot as plt
+import random
+import threading
+
+def run():
+    while (True):
+        a = random.randrange(0, 5)
+        if a == "":
+            break
+        return a
+class rectangle():
+    i = 0
+    height = 0
+    def __init__(self,x,c):
+        self.rect = plt.Rectangle((x, 0), width=10, height=10, fc=c)
+        self.rectangle = threading.Thread(target= self.update_height, args=(self.i,self.rect,)).start()
+        ax.add_patch(self.rect)
+        self.ani = animation.FuncAnimation(fig, self.update_height, frames=24, fargs=(self.rect,), interval=100)
+
+    def update_height(self, i,rect):
+        height = run()
+        rect.set_height(height)
+        print(rect)
+        return rect
+
+if __name__ == '__main__':
+    root =Tk()
+    root.geometry("800x500")
+
+    fig = plt.gcf()
+    plt.title("Sensor Monitoring")
+    ax = plt.axes(xlim=(0, 120), ylim=(0, 100))  # 가로 0~100, 세로 0~100
+    ax.set_aspect('equal')
+    m = FigureCanvasTkAgg(fig, master=root).get_tk_widget().pack()
+
+    rect1= rectangle(x=20,c='c')
+
+    root.mainloop()
