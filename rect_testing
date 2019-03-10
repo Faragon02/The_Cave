@@ -1,4 +1,4 @@
-# 기본 bar simulation
+# rectangle animaition
 
 from tkinter import *
 from matplotlib import animation
