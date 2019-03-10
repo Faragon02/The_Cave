@@ -9,7 +9,7 @@ def insert_data():
     data1,data2,data3,data4,data5 ="","","","",""
     sql = ""
 
-    account_con = sqlite3.connect("D:/pylogin/logDB")
+    account_con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
     account_cur = account_con.cursor()
 
     data1 = txt_Id.get()
@@ -28,49 +28,43 @@ def insert_data():
 
     else:
         messagebox.showinfo("succeful", "Join Succesfully")
+        account.destroy()
+
     account_con.commit()
     account_con.close()
 
 def cancle():
-    windows2.destroy()
+    account.destroy()
 
 # 메인 코드 부분 #
 if __name__ == '__main__':
-    windows2 = Tk()
-    windows2.title("Account")
-    windows2.geometry("500x700")
-    windows2.resizable(width=False, height=False)  # 사이즈 고정(Flase ==> True로 바꾸면 된다.)
-    windows2.configure(background="White")  # 생성한 winform 배경색 지정 가능
+    account = Tk()
+    account.title("Account")
+    account.geometry("500x700")
+    account.resizable(width=False, height=False)  # 사이즈 고정(Flase ==> True로 바꾸면 된다.)
+    account.configure(background="White")  # 생성한 winform 배경색 지정 가능
 
     # label
-    la_ac = Label(windows2, text="NEW Account", font=("바탕", 30), fg="blue", bg="white")
-    la_ID = Label(windows2, text="ID :", font=("바탕", 15), fg="black"
-                  , bg="white", width=30, height=3, anchor=W)
-    la_pass = Label(windows2, text="Passward :", font=("바탕", 15), fg="black"
-                    , bg="white", width=30, height=3, anchor=W)
-    la_name = Label(windows2, text="Name :", font=("바탕", 15), fg="black"
-                    , bg="white", width=30, height=3, anchor=W)
-    la_E = Label(windows2, text="Email :", font=("바탕", 15), fg="black"
-                 , bg="white", width=30, height=3, anchor=W)
+    la_ac = Label(account, text="NEW Account", font=("바탕", 30), fg="blue", bg="white")
+    la_ID = Label(account, text="ID :", font=("바탕", 15), fg="black", bg="white", width=30, height=3, anchor=W)
+    la_pass = Label(account, text="Passward :", font=("바탕", 15), fg="black", bg="white", width=30, height=3, anchor=W)
+    la_name = Label(account, text="Name :", font=("바탕", 15), fg="black", bg="white", width=30, height=3, anchor=W)
+    la_E = Label(account, text="Email :", font=("바탕", 15), fg="black", bg="white", width=30, height=3, anchor=W)
+    la_gol = Label(account, text="@", font=("바탕", 15), fg="black", bg="white")
+    la_age = Label(account, text="Age :", font=("바탕", 15), fg="black", bg="white", width=30, height=3, anchor=W)
+    la_info = Label(account, text=" ", font=("바탕", 15), fg="black", bg="white")
 
-    la_gol = Label(windows2, text="@", font=("바탕", 15), fg="black"
-                    , bg="white")
-    la_age = Label(windows2, text="Age :", font=("바탕", 15), fg="black"
-                   , bg="white", width=30, height=3, anchor=W)
-
-    la_info = Label(windows2, text=" ", font=("바탕", 15), fg="black"
-                   , bg="white")
     # textbox
-    txt_Id = Entry(windows2, width=30)
-    txt_pass = Entry(windows2, width=30)
-    txt_name = Entry(windows2, width=30)
-    txt_E1 = Entry(windows2, width=10)
-    txt_E2 = Entry(windows2, width=10)
-    txt_age = Entry(windows2, width=30)
+    txt_Id = Entry(account, width=30)
+    txt_pass = Entry(account, width=30)
+    txt_name = Entry(account, width=30)
+    txt_E1 = Entry(account, width=10)
+    txt_E2 = Entry(account, width=10)
+    txt_age = Entry(account, width=30)
 
     # button
-    btn_insert = Button(windows2, text="가입", font=("바탕", 20), fg="black", bg="white", command=insert_data)
-    btn_cancle = Button(windows2, text="취소", font=("바탕", 20), fg="black", bg="white", command=cancle)
+    btn_insert = Button(account, text="가입", font=("바탕", 20), fg="black", bg="white", command=insert_data)
+    btn_cancle = Button(account, text="취소", font=("바탕", 20), fg="black", bg="white", command=cancle)
 
     la_ac.pack()
     la_ID.pack()
@@ -90,4 +84,4 @@ if __name__ == '__main__':
     btn_insert.place(x=150, y=600, width=100, height=50)
     btn_cancle.place(x=350, y=600, width=100, height=50)
 
-    windows2.mainloop()
+    account.mainloop()
