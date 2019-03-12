@@ -33,6 +33,9 @@ decimg=cv2.imdecode(data,1)
 cv2.imshow('CLIENT',decimg)
 cv2.waitKey(0)
 cv2.destroyAllWindows() 
+
+
+
 server.py (수신단)
 #!/usr/bin/python
 import socket
