@@ -1,5 +1,4 @@
 from tkinter import *
-from tkinter import messagebox
 from glob import *
 
 import sys
@@ -7,34 +6,34 @@ import os
 import pickle
 import struct
 import sqlite3
-
 import subprocess
 import threading
 import socketserver
 import socket
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 import time
 
-src = "D:/PyProgram/Cvproject/semp"
-filist = glob("D:/PyProgram/Cvproject/DataDB.py")
+src = "D:/Potal/semp/"
+filist = glob("D:/Potal/semp/DataDB.py")
 
-def rename():
-    pass
+def date():
+    now = time.localtime()
+    data7 = ("%04d-%02d-%02d %02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min))
+    return data7
 class EchoRequestHandler(socketserver.BaseRequestHandler):
-    # Called before the handle()  method to perform any initialization actions required.
     def setup(self):
-        T.insert(END,self.client_address[0]+' connected!!'+'\n')
+        T.insert(END,self.client_address[0]+' connected!!'+"       "+ date() + '\n')
 
     def handle(self):
         try:
-            la_con.configure(text="Connecting...", foreground="red")
+            la_con.configure(text="Client: Connecting...", foreground="red")
+
             data = b""
             payload_size = struct.calcsize(">L")
-            print("payload_size: {}".format(payload_size))
+            image_counter= 0
 
             while True:
+
                 while len(data) < payload_size:
                     print("Recv: {}".format(len(data)))
                     data += self.request.recv(4096)
@@ -47,24 +46,27 @@ class EchoRequestHandler(socketserver.BaseRequestHandler):
 
                 while len(data) < msg_size:
                     data += self.request.recv(4096)
+
                 frame_data = data[:msg_size]
                 data = data[msg_size:]
 
                 frame = pickle.loads(frame_data, fix_imports=True, encoding="bytes")
                 frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-                # img = cv2.imwrite(src+str(i)+'.jpg',frame) # 저장 성공 허무하다...ㅋㅋㅋ
-                cv2.imshow('ImageWindow', frame)
-                i = +1
+
+                filename = './image/'+date()+"_"+str(image_counter)+'.jpg'
+                cv2.imwrite(filename, frame, params=[cv2.IMWRITE_JPEG_QUALITY, 100])
+                threading.Thread(target= insert_data, args=(filename,image_counter,)).start()
+                image_counter += 1
+                cv2.imshow('Frame', frame)
 
                 key = cv2.waitKey(25)
+
                 if key == 27:
-                    break
-            cv2.destroyAllWindows()
+                    cv2.destroyAllWindows()
 
         except:
-            la_con.configure(text="Disconnecting...",foreground="black")
-            messagebox.showerror("Erorr", "connecting Failed")
-            T.insert(END,self.client_address[0]+' disconnected!!'+'\n')
+            la_con.configure(text="Client: Disconnecting...",foreground="black")
+            T.insert(END,self.client_address[0]+' disconnected!!'+"       "+ date() + '\n')
 
     def finish(self):
         self.request.close()
@@ -72,11 +74,11 @@ class EchoRequestHandler(socketserver.BaseRequestHandler):
 class SocksServer(socketserver.ThreadingTCPServer):
     def __init__(self, listen_addr):
         socketserver.ThreadingTCPServer.__init__(self, listen_addr, EchoRequestHandler)
-        # Whether the server will allow the reuse of an address.
+
         self.allow_reuse_address = True
-        #
+
         self.daemon_threads = True
-        # request_queue_size
+
         self.request_queue_size = 50
 
     def stop(self):
@@ -85,44 +87,39 @@ class SocksServer(socketserver.ThreadingTCPServer):
     def start(self):
         self.serve_forever()
 
-def date():
-    now = time.localtime()
-    data7 = ("%04d-%02d-%02d %02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min))
-    return data7
-
-
-def insert_data(in_data1):
+def insert_data(in_data1,image_counter):
     con, cur = None, None
 
     # Image_addr,date
     data1, data2 = "", ""
     sql = ""
+    now = time.localtime()
 
     con = sqlite3.connect(src +"userDB")  # DB에 연결
     cur = con.cursor()
     cur.execute("SELECT * FROM datatable")  # 저장된 DB 출력
 
-    data1 = src +"'"+ in_data1 + "'"
-    data2= date()
+    data1= in_data1
+    if bool(data1) == True:
+        T.insert(END, date() + "침입자 발생 경찰에 연락했습니다."+'\n')
+    data2= ("%04d-%02d-%02d %02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min))
 
 
-    sql = "INSERT INTO dataTable VALUES('" + data1 + "','"+ data2  + ")"
+    sql = "INSERT INTO dataTable VALUES('" + data1 + "','"+ data2  + "')"
     cur.execute(sql)
 
     con.commit()  # DB에 저장
-    T.insert(END, date() + "침입자 발생 경찰에 연락했습니다.")
     con.close()  # DB 종료
-
 
 def runserve(host,port):
     ser = SocksServer((host, port)).start()
 
 def DataDB():
     subprocess.call(["python.exe",filist])
+
 def close():
     server.destroy()
 
-# Part of the Main code #
 if __name__ == '__main__':
     host =socket.gethostname()
     port = 9999
@@ -138,8 +135,9 @@ if __name__ == '__main__':
     edtframe.pack(side =RIGHT)
     ser = threading.Thread(target=runserve, args=(host,port,)).start()
 
-    la_ser = Label(server, text="SERVER", font=("바탕", 30), foreground="blue", background="white")
-    la_con = Label(server, text="Disconnecting...", font=("바탕", 15),foreground="black",background="white")
+    la_ser = Label(server, text="Server", font=("바탕", 30), foreground="blue", background="white")
+    la_con = Label(server, text="Client: Disconnecting...", font=("바탕", 15),foreground="black",background="white")
+    la_con_ph = Label(server, text="Phone: Disconnecting...", font=("바탕", 15), foreground="black", background="white")
 
     btn_close = Button(server, text="Close", background="white", command=close)
     btn_DB = Button(server, text="DB", background="white", command=DataDB)
@@ -150,15 +148,25 @@ if __name__ == '__main__':
     s.config(command = T.yview)
     T.config(yscrollcommand =s.set, state=NORMAL)
 
+    s1 = Scrollbar(edtframe)
+    T1 = Text(edtframe)
+    T1.focus_set()
+    s1.config(command=T.yview)
+    T1.config(yscrollcommand=s.set, state=NORMAL)
+
 
     la_ser.place(x=300, y=20)
-    la_con.place(x=600, y=100)
+    la_con.place(x=500, y=100)
+    la_con_ph.place(x=50, y=100)
 
 
     btn_close.place(x=600, y=450, width=100, height=50)
-    btn_DB.place(x=60, y=150, width=100, height=50)
+    btn_DB.place(x=50, y=450, width=100, height=50)
 
     s.pack(side=RIGHT, fill=Y)
     T.pack(side=RIGHT, fill=Y)
+
+    s1.pack(side=RIGHT, fill=Y)
+    T1.pack(side=RIGHT, fill=Y)
 
     server.mainloop()
