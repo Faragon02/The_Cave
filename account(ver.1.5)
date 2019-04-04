@@ -2,8 +2,6 @@ from tkinter import *
 from tkinter import messagebox
 import sqlite3
 
-# Part of variable declare #
-# Part of function declare #
 def insert_data():
     account_con, account_cur = None, None
     data1,data2,data3,data4,data5 ="","","","",""
@@ -36,13 +34,12 @@ def insert_data():
 def cancle():
     account.destroy()
 
-# 메인 코드 부분 #
 if __name__ == '__main__':
     account = Tk()
     account.title("Account")
     account.geometry("500x700")
-    account.resizable(width=False, height=False)  # 사이즈 고정(Flase ==> True로 바꾸면 된다.)
-    account.configure(background="White")  # 생성한 winform 배경색 지정 가능
+    account.resizable(width=False, height=False)
+    account.configure(background="White")
 
     # label
     la_ac = Label(account, text="NEW Account", font=("바탕", 30), fg="blue", bg="white")
