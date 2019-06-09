@@ -1,6 +1,6 @@
 from tkinter import *
-from tkinter import messagebox
 from glob import *
+from os.path import exists
 
 import sys
 import os
@@ -24,10 +24,6 @@ def date():
     data7 = ("%04d-%02d-%02d_%02d_%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min))
     return data7
 
-def shutdown():
-    shut = -1
-    return shut
-
 def DataDB():
     subprocess.call(["python.exe", filist])
 
@@ -42,11 +38,12 @@ def insert_data(image_counter):
     sql = ""
     now = time.localtime()
 
-    con = sqlite3.connect(src + "userDB")  # DB에 연결
+    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")  # DB에 연결
     cur = con.cursor()
     cur.execute("SELECT * FROM datatable")  # 저장된 DB 출력
 
-    data1 = './semp/cat_'+ date()+"_"+str(image_counter)+'.jpg'
+    data1 ='cat_'+ date()+"_"+str(image_counter)+'.jpg'
+
     if bool(data1) == True:
         T.insert(END, date() + "침입자 발생!!" + '\n')
 
@@ -61,7 +58,7 @@ def insert_data(image_counter):
     con.close()
 
 def select_case1(Year, Month):
-    strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
+    strdata1= []
 
     try:
 
@@ -79,14 +76,11 @@ def select_case1(Year, Month):
             if row == None:  # 들어온 것이 없다.
                 break  # 종료
             strdata1.append(row[0])
-            for name in strdata1:
-                return name
         con.commit()
         con.close()
-
+        return strdata1
     except:
         return None
-
 
 def select_case2(Year, Month, Day):
     strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
@@ -198,6 +192,7 @@ class usermanger:
         del self.users[dev_name]
         lock.release()
 
+        T.insert(END, "'" + host + "'")
         if dev_name == "Robot":
             la_con.configure(text="Client: Disconnecting...", foreground="black")
 
@@ -212,20 +207,20 @@ class RobotHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         global  dev_name
-
+        filename = []
 
         try:
             dev_name = self.registerUsername()
 
-            data = b""
-            payload_size = struct.calcsize(">L")
-            image_counter = 0
 
             while True:
-
                 if dev_name == 'Robot':
+                    data = b""
+                    payload_size = struct.calcsize(">L")
+                    image_counter = 0
                     while len(data) < payload_size:
-                        # print("Recv: {}".format(len(data)))
+                        # print(
+                        # "Recv: {}".format(len(data)))
                         data += self.request.recv(4096)
                         print(data)
 
@@ -237,57 +232,77 @@ class RobotHandler(socketserver.BaseRequestHandler):
 
                     while len(data) < msg_size:
                         data += self.request.recv(4096)
-
                     frame_data = data[:msg_size]
                     data = data[msg_size:]
-
                     frame = pickle.loads(frame_data, fix_imports=True, encoding="bytes")
                     frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-                    filename = './semp/cat_' + date() + "_" + str(image_counter) + '.jpg'
+                    filename = src + 'cat_' + date() + "_" + str(image_counter) + '.jpg'
                     cv2.imwrite(filename, frame, params=[cv2.IMWRITE_JPEG_QUALITY, 100])
 
-                    threading.Thread(target= insert_data, args=(image_counter,)).start()
+                    # threading.Thread(target=insert_data, args=(image_counter,)).start()
                     image_counter += 1
 
                     cv2.imshow('Frame', frame)
                     key = cv2.waitKey(25)
                     if key == 27:
+                        cv2.destroyAllWindows()
                         break
 
                 if dev_name == 'Phone':
-                    data1 = self.request.recv(4096)
-                    data1.split(',')
+                    data1 = self.request.recv(1024).decode(encoding='utf-8')
+                    data = data1.split(',')
+                    print(data)
 
-                    filename =[]
-
-                    if len(data1) == 1:
+                    if len(data) == 1:
                         self.request.send(N.encode())
-                    if len(data1) == 2:
-                        filename.append(select_case1(data[0], data[1]))
+                    if len(data) == 2:
+                        filename = select_case1(data[0], data[1])
+                    if len(data) == 3:
+                        filename = select_case2(data1[0], data1[1], data1[2])
+                    if len(data) == 4:
+                        filename = select_case3(data1[0], data1[1], data1[2], data1[3])
+                    if len(data) == 5:
+                        filename = select_case4(data1[0], data1[1], data1[2], data1[3], data1[4])
 
-                    if len(data1) == 3:
-                        filename.append(select_case2(data[0], data[1], data[2]))
+                    def sneding_imgname():
+                        while True:
+                            try:
+                                data = yield
+                                self.request.send(data.encode())
+                                if data == "-1":
+                                        break
+                            except StopIteration as e:
+                                print(e)
 
-                    if len(data1) == 4:
-                        filename.append(select_case3(data[0], data[1], data[2], data[3]))
+                    def sneding_image():
+                        try:
+                            while True:
+                                data = yield
+                                with open(data, "rb") as f:
+                                    f.read()
+                                    self.request.send(f)
+                                    if data == "-1":
+                                        break
+                        except StopIteration as e:
+                            print(e)
 
-                    if len(data1) == 5:
-                        filename.append(select_case4(data[0], data[1], data[2], data[3], data[4]))
+                    co = sneding_imgname()
+                    next(co)
 
-                    while True:
-                        for file in filename:
-                            self.request.send(file)
-                            with open(file,"rb") as image:
-                                self.request.send(image)
-                        if filename == None:
-                            break
+                    co1 = sneding_image()
+                    next(co1)
+
+                    for i in range(0, len(filename)):
+                        time.sleep(0.1)
+                        co.send(filename[i])
+                        co1.send(filename[i])
 
         except Exception as e:
-            T.insert(END,e)
+
+            T.insert(END, e)
+            T.insert(END, '\n')
 
         self.device.remove(dev_name)
-
-
     def registerUsername(self):
         while True:
             self.request.send('Device:'.encode())
@@ -302,20 +317,23 @@ class RobotHandler(socketserver.BaseRequestHandler):
 class mainServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
-def run_mainserver(shut=0):
+def run_mainserver(host,port):
     try:
-        ser = mainServer((socket.gethostname(),9999),RobotHandler)
+        ser = mainServer((host,port),RobotHandler)
         ser.serve_forever()
-    except -1:
-        T.insert(END,"server Close")
+    except Exception as e:
         server.shutdown()
         server.server_close()
 
 
 # Part of the Main code #
 if __name__ == '__main__':
-    src = "D:PyProgram/Cvproject/semp/"
+    src = "D:/PyProgram/Cvproject/semp/"
     lock = threading.Lock()
+    location = socket.gethostname()
+    host= "192.168.0.16"
+
+    port = 9999
 
     server = Tk()
     server.title("Server")
@@ -327,10 +345,7 @@ if __name__ == '__main__':
     edtframe.configure(bg="white")
     edtframe.pack(side=RIGHT)
 
-    shut =0
-    if shutdown() ==True:
-        shut = shutdown()
-    ser = threading.Thread(target=run_mainserver, args=(shut,)).start()
+    ser = threading.Thread(target=run_mainserver, args=(host,port,)).start()
     la_ser = Label(server, text="Paragon Security Server", font=("바탕", 30), foreground="blue", background="white")
     la_con = Label(server, text="Client: Disconnecting...", font=("바탕", 15), foreground="black", background="white")
     la_con_ph = Label(server, text="Phone: Disconnecting...", font=("바탕", 15), foreground="black",
@@ -338,7 +353,6 @@ if __name__ == '__main__':
 
     btn_close = Button(server, text="Close", background="white", command=close)
     btn_DB = Button(server, text="DB", background="white", command=DataDB)
-    btn_shutdown = Button(server, text = "Shutdown", background = "White", command = shutdown)
 
     s = Scrollbar(edtframe)
     T = Text(edtframe)
@@ -352,7 +366,6 @@ if __name__ == '__main__':
 
     btn_DB.place(x=50, y=150, width=100, height=50)
     btn_close.place(x=50, y=450, width=100, height=50)
-    btn_shutdown.place(x=50, y=200, width=100, height=50)
 
     s.pack(side=RIGHT, fill=Y)
     T.pack(side=RIGHT, fill=Y)
