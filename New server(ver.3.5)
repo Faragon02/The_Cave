@@ -1,6 +1,5 @@
 from tkinter import *
 from glob import *
-from os.path import exists
 
 import sys
 import os
@@ -14,7 +13,6 @@ import socket
 import cv2
 import time
 
-src = "D:/PyProgram/Cvproject/"
 filist = glob("D:/PyProgram/Cvproject/DataDB.py")
 
 N =0x00 # it's get one data. same Erorr
@@ -57,109 +55,34 @@ def insert_data(image_counter):
     con.commit()
     con.close()
 
-def select_case1(Year, Month):
-    strdata1= []
+def call_data(Year,Month, Day=""):
+    strdata1 = []
 
     try:
-
         con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
         cur = con.cursor()
 
+        if bool(Year)== True and (bool(Month) == True):
+            sql = "SELECT * FROM datatable where Year ='" + Year+"'and Month ='" + Month +"'"
+            cur.execute(sql)
 
-        sql = "SELECT * FROM datatable where Year ='" + Year+"'and Month ='" + Month +"'"
-        cur.execute(sql)
+        if bool(Year) == True and bool(Month) == True and bool(Day) == True:
+            sql = "SELECT * FROM datatable where Year ='" + Year + "' and Month ='" + Month + "'and Day ='" + Day+"'"
+            cur.execute(sql)
 
         # Data 조회
         while (True):
-
             row = cur.fetchone()  # DB 조회 호출
             if row == None:  # 들어온 것이 없다.
                 break  # 종료
             strdata1.append(row[0])
+            print(strdata1)
         con.commit()
         con.close()
         return strdata1
-    except:
-        return None
-
-def select_case2(Year, Month, Day):
-    strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
-
-    try:
-
-        con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
-        cur = con.cursor()
-
-        sql = "SELECT * FROM datatable where Year ='" + Year + "'and Month ='" + Month +'and Day ='+Day+"'"
-        cur.execute(sql)
-
-        # Data 조회
-        while (True):
-
-            row = cur.fetchone()  # DB 조회 호출
-            if row == None:  # 들어온 것이 없다.
-                break  # 종료
-            strdata1.append(row[0])
-            for name in strdata1:
-                return name
-        con.commit()
-        con.close()
 
     except:
-        return None
-
-def select_case3(Year, Month, Day, Hour):
-    strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
-
-    try:
-
-        con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
-        cur = con.cursor()
-
-        sql = "SELECT * FROM datatable where Year ='" + Year + "'and Month ='" + Month +'and Day ='+Day+"'and Hour'"+Hour+"'"
-        cur.execute(sql)
-
-        # Data 조회
-        while (True):
-
-            row = cur.fetchone()  # DB 조회 호출
-            if row == None:  # 들어온 것이 없다.
-                break  # 종료
-            strdata1.append(row[0])
-            for name in strdata1:
-                return name
-        con.commit()
-        con.close()
-
-    except:
-        return None
-
-def select_case4(Year, Month, Day,Hour,Minute):
-    strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
-
-    try:
-
-        con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
-        cur = con.cursor()
-
-        sql = "SELECT * FROM datatable where Year ='" + Year + "'and Month ='" + Month +\
-              'and Day ='+Day+"'and Hour'"+Hour+"'and Minute'"+Minute+"'"
-        cur.execute(sql)
-
-        # Data 조회
-        while (True):
-
-            row = cur.fetchone()  # DB 조회 호출
-            if row == None:  # 들어온 것이 없다.
-                break  # 종료
-            strdata1.append(row[0])
-            for name in strdata1:
-                return name
-        con.commit()
-        con.close()
-
-    except:
-        return None
+        print("error")
 
 class usermanger:
     def __init__(self):
@@ -222,7 +145,6 @@ class RobotHandler(socketserver.BaseRequestHandler):
                         # print(
                         # "Recv: {}".format(len(data)))
                         data += self.request.recv(4096)
-                        print(data)
 
                     # print("Done Recv: {}".format(len(data)))
                     packed_msg_size = data[:payload_size]
@@ -236,7 +158,7 @@ class RobotHandler(socketserver.BaseRequestHandler):
                     data = data[msg_size:]
                     frame = pickle.loads(frame_data, fix_imports=True, encoding="bytes")
                     frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-                    filename = src + 'cat_' + date() + "_" + str(image_counter) + '.jpg'
+                    filename =date() + "_" + str(image_counter) + '.jpg'
                     cv2.imwrite(filename, frame, params=[cv2.IMWRITE_JPEG_QUALITY, 100])
 
                     # threading.Thread(target=insert_data, args=(image_counter,)).start()
@@ -249,54 +171,39 @@ class RobotHandler(socketserver.BaseRequestHandler):
                         break
 
                 if dev_name == 'Phone':
-                    data1 = self.request.recv(1024).decode(encoding='utf-8')
-                    data = data1.split(',')
-                    print(data)
+                    data = self.request.recv(1024)
+                    if bool(data) == True:
+                        data1 = data.decode(encoding='utf-8')
+                        data1.split(",")
 
-                    if len(data) == 1:
-                        self.request.send(N.encode())
-                    if len(data) == 2:
-                        filename = select_case1(data[0], data[1])
-                    if len(data) == 3:
-                        filename = select_case2(data1[0], data1[1], data1[2])
-                    if len(data) == 4:
-                        filename = select_case3(data1[0], data1[1], data1[2], data1[3])
-                    if len(data) == 5:
-                        filename = select_case4(data1[0], data1[1], data1[2], data1[3], data1[4])
+                        Year = data1[0:4]
+                        Month = data1[5:7]
+                        Day = data1[8:10]
 
-                    def sneding_imgname():
-                        while True:
-                            try:
-                                data = yield
-                                self.request.send(data.encode())
-                                if data == "-1":
-                                        break
-                            except StopIteration as e:
-                                print(e)
+                        if len(data1) <= 8:
+                            image = call_data(Year=Year, Month=Month, Day="")
+                            print(image)
+                            for img in image:
+                                name = src + img
+                                with open(name, 'rb') as f:
+                                    res = f.readlines()
+                                    print(res)
+                                    f.close()
 
-                    def sneding_image():
-                        try:
-                            while True:
-                                data = yield
-                                with open(data, "rb") as f:
-                                    f.read()
-                                    self.request.send(f)
-                                    if data == "-1":
-                                        break
-                        except StopIteration as e:
-                            print(e)
+                        if len(data1) > 9 and len(data1) < 11:
+                            image = call_data(Year=Year, Month=Month, Day=Day)
 
-                    co = sneding_imgname()
-                    next(co)
-
-                    co1 = sneding_image()
-                    next(co1)
-
-                    for i in range(0, len(filename)):
-                        time.sleep(0.1)
-                        co.send(filename[i])
-                        co1.send(filename[i])
-
+                            print(image)
+                            for img in image:
+                                name = src + img
+                                with open(name, 'rb') as f:
+                                    res = f.read()
+                                    print(res)
+                                    print(len(res))
+                                    self.request.send(res)
+                                    f.close()
+                        else:
+                            break
         except Exception as e:
 
             T.insert(END, e)
@@ -305,7 +212,6 @@ class RobotHandler(socketserver.BaseRequestHandler):
         self.device.remove(dev_name)
     def registerUsername(self):
         while True:
-            self.request.send('Device:'.encode())
             dev_name = self.request.recv(1024)
             dev_name = dev_name.decode().strip()
             if self.device.adduser(dev_name, self.request, self.client_address[0]):
