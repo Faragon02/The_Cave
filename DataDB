@@ -5,74 +5,144 @@ from tkinter import messagebox
 def insert_data():
     con, cur = None, None
 
-    # Image,sensor1,sensor2,sensor3,sensor4,sensor5,date
-    data1, data2= "", ""
+    # Image_addr,date #
+    data1, data2, data3, data4, data5, data6 =edt1.get(),edt2.get(),edt3.get(),edt4.get(),edt5.get(),edt6.get()
     sql = ""
-
-    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB") # DB에 연결
+    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")  # DB에 연결
     cur = con.cursor()
+    cur.execute("SELECT * FROM datatable")  # 저장된 DB 출력
 
-    data1 = edt1.get()
-    data2 = edt2.get()
-
-    try:
-        sql = "INSERT INTO dataTable VALUES('" + data1 + "','"+ data2 +")"
-
-        cur.execute(sql)
-
-    except :
-        messagebox.showerror('ERROR','Failed data input')
-    else:
-        messagebox.showinfo('Succesfull','sucessed data input')
+    sql = "INSERT INTO dataTable VALUES('" + data1 + "','" + data2 + "','" + data3 + "','" + data4 + "','" + data5 + "','" + data6 + "')"
+    cur.execute(sql)
 
     con.commit()
     con.close()
 
-def select_data():
-    strdata1 ,strdata2=[] ,[]
-
-    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
-    cur = con.cursor()
-    cur.execute("SELECT * FROM datatable")
-
-    # table 표시
-    strdata1.append("Image");strdata2.append("Date")
-
-    strdata1.append("--------------------------------------------");strdata2.append("--------------------------------------------")
-
-
-    while (True):
-
-        row = cur.fetchone()
-        if row == None:
-            break
-        strdata1.append(row[0]);strdata2.append(row[1])
-
-    listdata1.delete(0, listdata1.size()-1); listdata2.delete(0, listdata2.size()-1)
-
-
-    for item1,item2 in zip(strdata1,strdata2):
-        listdata1.insert(END, item1); listdata2.insert(END, item2)
-
-    con.close()
-
-def delete_data():
-    con, cur = None, None
-
-    # Image,sensor1,sensor2,sensor3,sensor4,sensor5,date
-    data1, data2, data3, data4, data5 , data6, data7 = "","","","","" ,"" ,""
-    sql = ""
-
-    con = sqlite3.connect("D:/Potal/semp/userDB")
-    cur = con.cursor()
-
-    data1 = edt1.get(); data2 = edt2.get()
+def select_datacace():
+    strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
 
     try:
-        sql = "DELETE FROM datatable Image ID='" + data1 + "' and sensor1='" + data2 \
-              + "' and sensor2='" + data3 + "' and sensor3='"+ data4 \
-              + "' and sensor4=" + data5+ "' and sensor5="+ data6 \
-              +"' and date="+ data7+"'"
+        Year = edt2.get()
+        Month = edt3.get()
+        Day = edt4.get()
+        Hour =edt5.get()
+        Minute =edt6.get()
+
+        con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
+        cur = con.cursor()
+
+        if bool(edt1.get()) == True or (bool(edt2.get()) == True and bool(edt3.get()) == True):
+            sql = "SELECT * FROM datatable where Year ='" + Year+"'and Month ='" + Month +"'"
+            cur.execute(sql)
+
+        if bool(edt1.get()) == True or (
+                bool(edt2.get()) == True and bool(edt3.get()) == True and bool(edt4.get()) == True):
+            sql = "SELECT * FROM datatable where Year ='" + Year + "' and Month ='" + Month + "'and Day ='" + Day+"'"
+            cur.execute(sql)
+
+        if bool(edt1.get()) == True or (bool(edt2.get()) == True and bool(edt3.get()) == True
+                                        and bool(edt4.get()) == True and bool(edt5.get()) == True):
+            sql = "SELECT * FROM datatable where Year ='" + Year + "' and Month = '" + Month + "' and Day = '" + Day + "'and Hour ='" + Hour +"'"
+            cur.execute(sql)
+
+        if bool(edt1.get()) == True or (bool(edt2.get()) == True and bool(edt3.get()) == True
+                                        and bool(edt4.get()) == True and bool(edt5.get()) == True and bool(
+                    edt6.get()) == True):
+            sql = "SELECT * FROM datatable where Year = '" + Year + "' and Month = '" + Month + "' and Day ='" \
+              + Day + "' or Hour = '" + Hour + "' or Minute =" + Minute + "'"
+            cur.execute(sql)
+
+        # table 표시
+        strdata1.append("Image");strdata2.append("Year");strdata3.append("Month")
+        strdata4.append("Day");strdata5.append("Hour");strdata6.append("Minute")
+
+        strdata1.append("--------------------");strdata2.append("--------------------")
+        strdata3.append("--------------------");strdata4.append("--------------------")
+        strdata5.append("--------------------");strdata6.append("--------------------")
+
+        # Data 조회
+        while (True):
+
+            row = cur.fetchone()  # DB 조회 호출
+            if row == None:  # 들어온 것이 없다.
+                break  # 종료
+            strdata1.append(row[0]);strdata2.append(row[1]);strdata3.append(row[2])
+            strdata4.append(row[3]);strdata5.append(row[4]);strdata6.append(row[5])  # 호출한 데이터를 각 strdata에 추가
+
+        listdata1.delete(0, listdata1.size() - 1);listdata2.delete(0, listdata2.size() - 1)  # listbox 초기화
+        listdata3.delete(0, listdata3.size() - 1);listdata4.delete(0, listdata4.size() - 1)
+        listdata5.delete(0, listdata5.size() - 1);listdata6.delete(0, listdata6.size() - 1)
+
+        for item1, item2, item3, item4, item5, item6 in zip(strdata1, strdata2, strdata3, strdata4, strdata5, strdata6):
+            listdata1.insert(END, item1);listdata2.insert(END, item2); listdata3.insert(END, item3)
+            listdata4.insert(END, item4);listdata5.insert(END, item5); listdata6.insert(END, item6)
+
+        con.commit()
+        con.close()
+
+    except:
+        messagebox.showerror("Error", "it has not data. please checke in")
+
+def select():
+    strdata1, strdata2, strdata3, strdata4, strdata5, strdata6 = [], [], [], [], [], []
+
+    try:
+        con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")
+        cur = con.cursor()
+        sql = "SELECT * FROM datatable "
+        cur.execute(sql)
+
+        # table 표시
+        strdata1.append("Image");strdata2.append("Year");strdata3.append("Month")
+        strdata4.append("Day");strdata5.append("Hour");strdata6.append("Minute")
+
+        strdata1.append("--------------------");strdata2.append("--------------------")
+        strdata3.append("--------------------");strdata4.append("--------------------")
+        strdata5.append("--------------------");strdata6.append("--------------------")
+
+        # Data 조회
+        while (True):
+
+            row = cur.fetchone()  # DB 조회 호출
+            if row == None:  # 들어온 것이 없다.
+                break  # 종료
+            strdata1.append(row[0]);strdata2.append(row[1]);strdata3.append(row[2])
+            strdata4.append(row[3]);strdata5.append(row[4]);strdata6.append(row[5])  # 호출한 데이터를 각 strdata에 추가
+
+        listdata1.delete(0, listdata1.size() - 1);listdata2.delete(0, listdata2.size() - 1)  # listbox 초기화
+        listdata3.delete(0, listdata3.size() - 1);listdata4.delete(0, listdata4.size() - 1)
+        listdata5.delete(0, listdata5.size() - 1);listdata6.delete(0, listdata6.size() - 1)
+
+        for item1, item2, item3, item4, item5, item6 in zip(strdata1, strdata2, strdata3, strdata4, strdata5, strdata6):
+            listdata1.insert(END, item1);listdata2.insert(END, item2);listdata3.insert(END, item3)
+            listdata4.insert(END, item4);listdata5.insert(END, item5);listdata6.insert(END, item6)
+
+        con.commit()
+        con.close()
+
+    except:
+        messagebox.showerror("Error", "it has not data. please checke in")
+
+def select_delete_data():
+    con, cur = None, None
+
+    # Image,Year,Month,Day,Hour,Minute
+    data1, data2, data3, data4, data5 , data6= "","","","","" ,""
+    sql = ""
+
+    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB") # DB에 연결
+    cur = con.cursor() # DB실행 혹은 리턴 통로 역활
+
+    Year = edt2.get()
+    Month = edt3.get()
+    Day = edt4.get()
+    Hour = edt5.get()
+    Minute = edt6.get()
+
+    try:
+        sql = "DELETE FROM datatable Year='" + Year \
+              + "' and Month='" + Month + "' and Day='"+ Day \
+              + "' and Hour=" + Hour+ "' and minute="+ Minute+"'"
 
         cur.execute(sql)
     except :
@@ -80,43 +150,111 @@ def delete_data():
     else:
         messagebox.showinfo('Succesfull','sucessed data delete')
 
-    con.commit()
-    con.close()
+    con.commit() # DB에 저장
+    con.close() # DB 종료
 
+
+def all_delete_data():
+    con, cur = None, None
+
+    # Image,Year,Month,Day,Hour,Minute
+    data1, data2, data3, data4, data5, data6 = "", "", "", "", "", ""
+    sql = ""
+
+    con = sqlite3.connect("D:/PyProgram/Cvproject/userDB")  # DB에 연결
+    cur = con.cursor()
+
+    try:
+        sql = "DELETE FROM datatable"
+
+        cur.execute(sql)
+    except:
+        messagebox.showerror('ERROR', 'Failed data deleting')
+    else:
+        messagebox.showinfo('Succesfull', 'sucessed data delete')
+        pass
+    con.commit()  # DB에 저장
+    con.close()  # DB 종료
+
+## 메인 코드 부분 ##
 
 if __name__ == '__main__':
     DDB = Tk()
-    DDB.geometry("500x500")
+    DDB.geometry("1200x500")
     DDB.resizable(False, False)
+    DDB.configure(background = "White")
     DDB.title("DataBase center")
 
-    edtframe = Frame(DDB)
+    edtframe = Frame(DDB, bg= "White")
     edtframe.pack()
+    edtframe1 = Frame(DDB, bg= "white")
+    edtframe1.pack()
+
     listframe = Frame(DDB)
     listframe.pack(side=BOTTOM, fill=BOTH, expand=1)
 
+    # 입력창
     # text
     label1 = Label(edtframe, text="Image:", bg="white").pack(side=LEFT, padx=5, pady=5)
     edt1 = Entry(edtframe, width=15)
     edt1.pack(side=LEFT, padx=10, pady=10)
 
-    label2 = Label(edtframe, text="Date:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    label2 = Label(edtframe, text="Year:", bg="white").pack(side=LEFT, padx=5, pady=5)
     edt2 = Entry(edtframe, width=10)
     edt2.pack(side=LEFT, padx=10, pady=10)
 
-    # Button
-    btn_insert = Button(edtframe, text="입력", command=insert_data)
+    label3 = Label(edtframe, text="Month:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt3 = Entry(edtframe, width=10)
+    edt3.pack(side=LEFT, padx=10, pady=10)
+
+    label4 = Label(edtframe, text="Day:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt4 = Entry(edtframe, width=10)
+    edt4.pack(side=LEFT, padx=10, pady=10)
+
+    label5 = Label(edtframe, text="Hour:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt5 = Entry(edtframe, width=10)
+    edt5.pack(side=LEFT, padx=10, pady=10)
+
+    label6 = Label(edtframe, text="Minute:", bg="white").pack(side=LEFT, padx=5, pady=5)
+    edt6 = Entry(edtframe, width=10)
+    edt6.pack(side=LEFT, padx=10, pady=10)
+
+    btn_insert=Button(edtframe1,text = "삽입", bg = "white", command = insert_data)
     btn_insert.pack(side=LEFT, padx=10, pady=10)
+    btn_cho_select = Button(edtframe1, text="선택 조회", bg="white", command=select_datacace)
+    btn_cho_select.pack(side=LEFT, padx=10, pady=10)
 
-    btn_select = Button(edtframe, text="조회", command=select_data)
+    btn_select = Button(edtframe1, text="전체 조회", bg= "white", command=select)
     btn_select.pack(side=LEFT, padx=10, pady=10)
 
-    btn_select = Button(edtframe, text="삭제", command=delete_data)
-    btn_select.pack(side=LEFT, padx=10, pady=10)
+    btn_sle_delete = Button(edtframe1, text="선택 삭제", bg= "white", command=select_delete_data)
+    btn_sle_delete.pack(side=LEFT, padx=10, pady=10)
+
+    btn_All_delete = Button(edtframe1, text="전체 삭제", bg= "white", command=all_delete_data)
+    btn_All_delete.pack(side=LEFT, padx=10, pady=10)
 
     # ListBox
     listdata1 = Listbox(listframe, bg='white');listdata1.pack(side=LEFT, fill=BOTH, expand=1)
     listdata2 = Listbox(listframe, bg='white');listdata2.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata3 = Listbox(listframe, bg='white');listdata3.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata4 = Listbox(listframe, bg='white');listdata4.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata5 = Listbox(listframe, bg='white');listdata5.pack(side=LEFT, fill=BOTH, expand=1)
+    listdata6 = Listbox(listframe, bg='white');listdata6.pack(side=LEFT, fill=BOTH, expand=1)
 
+    sc = Scrollbar(listframe)
+    sc1 = Scrollbar(listframe)
+
+    listdata1.focus_set()
+    listdata2.focus_set()
+    listdata3.focus_set()
+    listdata5.focus_set()
+    listdata6.focus_set()
+
+    sc.pack(side = RIGHT, fill = Y)
+    sc1.pack(side=BOTTOM, fill=X)
+
+    sc.config(command=listdata1.yview and listdata2.yview and listdata3.yview and listdata4.yview and listdata5.yview and listdata6.yview)
+    sc1.config(command=listdata1.xview)
+    listdata1.config(xscrollcommand = sc1.set)
 
     DDB.mainloop()
